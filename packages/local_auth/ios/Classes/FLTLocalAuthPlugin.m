@@ -38,13 +38,28 @@
   } else if ([@"getAvailableBiometrics" isEqualToString:call.method]) {
     [self getAvailableBiometrics:result];
   } else if ([@"isDeviceSupported" isEqualToString:call.method]) {
-    result(@YES);
+    result([NSNumber numberWithBool:[self isPasscodeEnabled]]);
   } else {
     result(FlutterMethodNotImplemented);
   }
 }
 
 #pragma mark Private Methods
+
+- (BOOL) isPasscodeEnabled{
+  NSError *error = nil;
+  LAContext *context = [[LAContext alloc] init];
+
+  BOOL passcodeEnabled = [context canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:&error];
+
+  if(passcodeEnabled) {
+     NSLog(@"Passcode enabled.");
+     return YES;
+  }
+
+  NSLog(@"Passcode NOT enabled: %@", error.localizedDescription);
+  return NO;
+}
 
 - (void)setAuthContextOverrides:(NSArray<LAContext *> *)authContexts {
   _authContextOverrides = [authContexts mutableCopy];
